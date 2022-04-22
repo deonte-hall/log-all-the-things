@@ -1,9 +1,15 @@
 const express = require('express');
 const morgan = require('morgan');
 const fs = require('fs');
+const csvtojson = require('csvtojson');
+
 
 const app = express();
+app.use(morgan('dev'));
 
+app.set("json spaces", 2);
+
+//This is commented unused code 
 //const csv = require('./log.csv')
 //const bodyParser = require('body-parser');
 //const PORT = 3000;
@@ -15,32 +21,48 @@ const app = express();
 //app.use(morgan('custom'));
 
 
-app.use((req, res, next) => {
-    // logging code here
-    let time = new Date;
+//Within this app.use will be all my logging code 
+
+//Get method for default backslash "/" or native resource that will send the message "OK" to browser
+app.get('/', (req, res) => {
+    let agent = req.headers['user-agent'].replace(/,/g, "");
+    let time = new Date().toISOString();
     let method = req.method;
     let resource = req.originalUrl;
     let version = "HTTP/" + req.httpVersion;
-    let agent = req.headers['user-agent'];
     let status = res.statusCode;
-    
-    
-    
+    let fullData= agent + "," + time + "," + method + "," + resource + "," + version + "," + status;
 
-    console.log(time, method, resource, version, "header:", agent, status)
+         console.log(fullData)
 
-     // console.log("this method", req.method);    next();
+        fs.appendFile('./server/log.csv', '\n' + fullData, function(file){
+            console.log("Successful append to log.csv");
+            
+        });
+        res.sendStatus(200);
+
+
 });
 
-
-app.get('/', (req, res) => {
-    res.status(200).send("OK");
-    console.log("Hello");
-});
-
+//Get method for "/logs" that should send the updated json file and a status code of 200
 app.get('/logs', (req, res) => {
-//return a json object containing the log data here
-console.log("Hello")
-});
+    //return a json object containing the log data here
+    csvtojson()
+    .fromFile("./server/log.csv")
+    .then((jsonObj)=>{
+    console.log(jsonObj);
+    res.json(jsonObj)
+})
+    
+    });
+
+  
+
+
+
+app.get('*', (req, res) => {
+    res.sendStatus(404);
+    res.send("ERROR 404 - REQUESTED RESOURCE NOT FOUND")
+})
 
 module.exports = app;
