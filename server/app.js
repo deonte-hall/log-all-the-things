@@ -10,20 +10,21 @@ app.use(morgan('dev'));
 app.set("json spaces", 2);
 
 //This is commented unused code 
-//const csv = require('./log.csv')
-//const bodyParser = require('body-parser');
-//const PORT = 3000;
+// const csv = require('./log.csv')
+// const bodyParser = require('body-parser');
+// const PORT = 3000;
 
-//app.use(bodyParser.json())
-//app.use(express.static('public'))
-//This is used to give morgan a custom logging format 
-//app.use(morgan.token("custom", ":user-agent :date[iso] :method :url HTTP/:http-version :status"));
-//app.use(morgan('custom'));
+// app.use(bodyParser.json())
+// app.use(express.static('public'))
+// This is used to give morgan a custom logging format 
+// app.use(morgan.token("custom", ":user-agent :date[iso] :method :url HTTP/:http-version :status"));
+// app.use(morgan('custom'));
 
 
 //Within this app.use will be all my logging code 
 
 //Get method for default backslash "/" or native resource that will send the message "OK" to browser
+
 app.get('/', (req, res) => {
     let agent = req.headers['user-agent'].replace(/,/g, "");
     let time = new Date().toISOString();
@@ -31,6 +32,7 @@ app.get('/', (req, res) => {
     let resource = req.originalUrl;
     let version = "HTTP/" + req.httpVersion;
     let status = res.statusCode;
+
     let fullData= agent + "," + time + "," + method + "," + resource + "," + version + "," + status;
 
          console.log(fullData)
@@ -39,10 +41,25 @@ app.get('/', (req, res) => {
             console.log("Successful append to log.csv");
             
         });
-        res.sendStatus(200);
+        res.status(200);
 
 
 });
+// class Car = {
+
+//     constructor(color, model){
+//         this.color = color;
+//         this.model = model;
+//     }
+//     accelerate(){
+
+//     console.log("go")
+//     }
+
+
+// }
+// let ford = new Car("red", "focus");
+// ford.accelerate();
 
 //Get method for "/logs" that should send the updated json file and a status code of 200
 app.get('/logs', (req, res) => {
@@ -52,13 +69,9 @@ app.get('/logs', (req, res) => {
     .then((jsonObj)=>{
     console.log(jsonObj);
     res.json(jsonObj)
-})
-    
     });
-
-  
-
-
+    
+});
 
 app.get('*', (req, res) => {
     res.sendStatus(404);
